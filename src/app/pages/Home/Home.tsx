@@ -11,6 +11,10 @@ import "./Home.css";
 import { TypeAnimation } from "react-type-animation";
 import { Link, } from "react-router-dom";
 import { motion } from "framer-motion"
+import Marquee, { Motion, randomIntFromInterval } from "react-marquee-slider";
+import times from "lodash/times";
+import Reviews from '../../../_metronic/partials/reviews/reviews';
+import { withSize } from 'react-sizeme';
 
 const Home = () => {
   const containerVariants = {
@@ -42,7 +46,7 @@ const Home = () => {
           <Col className="mx-2">
             <TypeAnimation
               sequence={[
-                "Welcome to ReclaimHub",
+                "Welcome to PlotWriter",
                 1500,
                 "Unleash Your Creativity with AI",
                 1500,
@@ -159,10 +163,19 @@ const Home = () => {
             </Card>
           </Col>
         </Row>
+        {/* Testimonial */}
+        <Row>
+          <Col>
+            <h2 className="how-work-head">What Our Customers Say?</h2>
+          </Col>
+        </Row>
+        <ReviewsWithSize onStartPerformance={() => {console.log("");}} onEndPerformance={() => {console.log("");}} />
+
       </Container>
     </motion.div>
   );
 };
 
+const ReviewsWithSize = withSize()(Reviews);
 
 export default Home;
