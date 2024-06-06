@@ -37,6 +37,7 @@ const Home = () => {
     >
       <Container fluid>
         {/* Row - top-box */}
+        {/* type animation  */}
         <Row className="top-box">
           <Col className="mx-2">
             <TypeAnimation

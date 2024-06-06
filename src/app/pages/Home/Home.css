@@ -38,9 +38,11 @@
 }
 .card-section{
     display: flex;
-    height: 80vh;
+    height: 100%;
     justify-content: center;
     align-items: center;
+    border: 2px solid yellow;
+    margin-bottom: 12px;
 }
 .card-box{
     margin-bottom: 12px;
@@ -51,21 +53,15 @@
 .card {
     border: 1px solid #ddd;
     transition: box-shadow 0.3s ease-in-out; 
-    width: 350px;
-    height: 450px;
+    width: 280px;
+    height: 350px;
     overflow: hidden;
 }
 
 .card:hover{
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.3); /* Add a subtle box-shadow on hover */
 }
-[data-theme="light"] .card:hover{
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.3); /* Add a subtle box-shadow on hover */
-}
 
-[data-theme="dark"] .card:hover{
-    box-shadow: 0 0 15px rgba(255, 255, 255, 0.3); /* Add a subtle box-shadow on hover */
-}
 
 /* Apply the background color based on the theme */
 [data-theme="dark"] .card{
@@ -87,16 +83,6 @@
     width: 100%;
     height: 100%;
     object-fit: cover; /* Ensure the image covers the container */
-}
-
-[data-theme="dark"] .card1-bottom-button{
-    background-color: white;
-    color: black;
-}
-
-[data-theme="light"] .card1-bottom-button{
-    background-color: black;
-    color: white;
 }
 
 .card1-bottom-button:hover{
