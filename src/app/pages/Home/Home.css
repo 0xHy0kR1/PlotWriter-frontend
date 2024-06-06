@@ -1,0 +1,106 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@800;1000&family=Quicksand:wght@600&family=Roboto&display=swap');
+
+.top-box{
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    flex-direction: row;
+    padding: 40px 60px;
+    width: 100%;
+    height: 94%;
+    box-sizing: border-box;
+}
+@media (max-width: 925px) {
+    .top-box {
+      flex-direction: column;
+      align-items: center;
+    }
+  
+    .mx-2 {
+      text-align: center; /* Center the text when in column layout */
+      margin-bottom: 20px; /* Add some space between text and image */
+    }
+    .home-top-img {
+      width: 80%;
+      height: 90%;
+    }
+  }
+
+.how-work-head{
+    font-weight: bolder;
+    font-family: 'Nunito', sans-serif;
+    text-align: center;
+}
+
+.home-top-img{
+    width: 100%;
+    height: 90%;
+}
+.card-section{
+    display: flex;
+    height: 80vh;
+    justify-content: center;
+    align-items: center;
+}
+.card-box{
+    margin-bottom: 12px;
+    margin-top: 12px;
+    display: flex;
+    justify-content: center;
+}
+.card {
+    border: 1px solid #ddd;
+    transition: box-shadow 0.3s ease-in-out; 
+    width: 350px;
+    height: 450px;
+    overflow: hidden;
+}
+
+.card:hover{
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.3); /* Add a subtle box-shadow on hover */
+}
+[data-theme="light"] .card:hover{
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.3); /* Add a subtle box-shadow on hover */
+}
+
+[data-theme="dark"] .card:hover{
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.3); /* Add a subtle box-shadow on hover */
+}
+
+/* Apply the background color based on the theme */
+[data-theme="dark"] .card{
+    background: #17191e;
+    color: white;
+}
+
+[data-theme="light"] .card{
+    background: white;
+    color: black;
+}
+
+.card .card-img-container {
+    height: 70%;
+    overflow: hidden;
+}
+  
+.card .card-img-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Ensure the image covers the container */
+}
+
+[data-theme="dark"] .card1-bottom-button{
+    background-color: white;
+    color: black;
+}
+
+[data-theme="light"] .card1-bottom-button{
+    background-color: black;
+    color: white;
+}
+
+.card1-bottom-button:hover{
+    background-color: #157347;
+    color: white;
+}
+
