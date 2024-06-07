@@ -19,8 +19,6 @@ const Navbar = () => {
   return (
     <div className='app-navbar flex-shrink-0'>
 
-
-
       <div className={clsx('app-navbar-item', itemClass)}>
         <ThemeModeSwitcher toggleBtnClass={clsx('btn-active-light-primary btn-custom')} />
       </div>
@@ -38,7 +36,7 @@ const Navbar = () => {
           <HeaderUserMenu />
         </div>
       )}
-
+      
       {config.app?.header?.default?.menu?.display && (
         <div className='app-navbar-item d-lg-none ms-2 me-n3' title='Show header menu'>
           <div

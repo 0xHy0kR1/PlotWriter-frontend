@@ -3,6 +3,7 @@ import {useLocation} from 'react-router'
 import {Link} from 'react-router-dom'
 import clsx from 'clsx'
 import {checkIsActive, KTIcon} from '../../../../helpers'
+import logo from '/src/assets/logo/index_logo.png';
 
 type Props = {
   to: string

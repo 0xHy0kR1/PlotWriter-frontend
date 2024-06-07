@@ -2,12 +2,16 @@
 import {FC, useEffect} from 'react'
 import {ILayout, useLayout} from '../../core'
 import {MenuInner} from './header-menus'
+import { Link, useLocation } from 'react-router-dom';
+import logo from '../../../../../src/assets/logo/index_logo.png';
 
 const Header: FC = () => {
   const {config} = useLayout()
   useEffect(() => {
     updateDOM(config)
   }, [config])
+
+  const { pathname } = useLocation();
 
   return (
     <div
@@ -25,6 +29,17 @@ const Header: FC = () => {
       id='kt_app_header_menu'
       data-kt-menu='true'
     >
+      {pathname === '/' && (
+        <div className='d-flex align-items-center flex-grow-1 flex-lg-grow-0'>
+          <Link to='/' className='d-lg-none'>
+            <img
+              alt='Logo'
+              src={logo}
+              className='h-30px'
+            />
+          </Link>
+        </div>
+      )}
       <MenuInner />
     </div>
   )

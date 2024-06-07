@@ -4,7 +4,8 @@ import styled from "styled-components";
 import times from "lodash/times";
 import { withSize } from "react-sizeme";
 import { nanoid } from "nanoid";
-
+import { BsInstagram } from "react-icons/bs";
+import { FaImdb } from "react-icons/fa";
 import FullWidth from "./FullWidth";
 
 const Height = styled.div<{ height?: number }>`
@@ -52,11 +53,43 @@ const Content = styled.div<{ scale: number }>`
 `;
 
 const portraits = [
-  "../../../../src/assets/avatars/300-1.jpg",
-  "../../../../src/assets/avatars/300-2.jpg",
-  "../../../../src/assets/avatars/300-3.jpg",
-  "../../../../src/assets/avatars/300-4.jpg",
-  "../../../../src/assets/avatars/300-5.jpg",
+  "../../../../src/assets/avatars/Julie_Ryan.png",
+  "../../../../src/assets/avatars/alex_smith.png",
+  "../../../../src/assets/avatars/Martin_Scorsese.png",
+  "../../../../src/assets/avatars/Christopher_Nolan.png",
+  "../../../../src/assets/avatars/Quentin_Tarantino.png",
+];
+
+const reviewerNames = [
+  "Julie Ryan",
+  "Alex Smith",
+  "Martin Scorsese",
+  "Christopher Nolan",
+  "Quentin Tarantino",
+];
+
+const reviewsText = [
+  "PlotWriter's AI Co-Pilot Editor and analytics have transformed my scriptwriting. Highly recommended!",
+  "The AI tools are exceptional, making my writing process faster and more enjoyable.",
+  "PlotWriter's analytics and AI suggestions offer fresh perspectives and help improve my scripts.",
+  "The AI Co-Pilot Editor helps overcome writer’s block with creative prompts. A must-have for scriptwriters.",
+  "PlotWriter's pitch deck builder is intuitive and the AI suggestions are spot on. A huge timesaver.",
+];
+
+const reviewerInsta = [
+  "https://www.instagram.com/julieryan99",
+  "https://www.instagram.com/alexpsmith/",
+  "https://www.instagram.com/martinscorsese_/",
+  "https://www.instagram.com/christophernolann/",
+  "https://www.instagram.com/tarantinoxx/",
+];
+
+const reviewerImdb = [
+  "https://www.imdb.com/name/nm0752646/",
+  "https://www.imdb.com/name/nm0807243/",
+  "https://www.imdb.com/name/nm0000217/",
+  "https://www.imdb.com/name/nm0634240/",
+  "https://www.imdb.com/name/nm0000233/",
 ];
 
 interface ReviewsProps {
@@ -100,21 +133,27 @@ const Reviews: React.FC<ReviewsProps> = ({ size, onStartPerformance, onEndPerfor
           onFinish={onEndPerformance} 
           direction={"ltr"} 
           resetAfterTries={0}>
-          {times(5, String).map((id) => (
-            <Box key={`marquee-example-review-${id}`} scale={scale}>
-              <Review scale={scale}>
-                <Avatar scale={scale}>
-                  <img src={portraits[parseInt(id)]} alt="" />
-                </Avatar>
-                <Content scale={scale}>
-                  <p>
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
-                    incididunt ut labore et dolore magna aliqua.
-                  </p>
-                </Content>
-              </Review>
-            </Box>
-          ))}
+          {reviewsText.map((review, index) => (
+              <Box key={`marquee-example-review-${index}`} scale={scale}>
+                <Review scale={scale}>
+                  <Avatar scale={scale}>
+                    <img src={portraits[index]} alt={reviewerNames[index]} />
+                  </Avatar>
+                  <Content scale={scale}>
+                    <div className="personal-info">
+                      <h3 className="text-xl text-black">{reviewerNames[index]}</h3>
+                      <p>{review}</p>
+                      <a href={reviewerInsta[index]} target="_blank" rel="noopener noreferrer">
+                      <BsInstagram size={24} color="black" />
+                      </a>
+                      <a href={reviewerImdb[index]} target="_blank" rel="noopener noreferrer">
+                        <FaImdb size={24} color="black"/>
+                      </a>
+                    </div>
+                  </Content>
+                </Review>
+              </Box>
+            ))}
         </Marquee>
       </Height>
     </FullWidth>
