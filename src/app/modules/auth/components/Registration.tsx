@@ -61,6 +61,8 @@ export function Registration() {
           values.password,
           values.changepassword
         )
+        console.log("auth: ", JSON.stringify(auth));
+        console.log("auth.api_token: ", auth.api_token);
         saveAuth(auth)
         const {data: user} = await getUserByToken(auth.api_token)
         setCurrentUser(user)

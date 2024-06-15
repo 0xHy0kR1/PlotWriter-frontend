@@ -23,7 +23,6 @@ const PrivateRoutes: FC = () => {
   return (
     <Routes>
       <Route element={<MasterLayout />}>
-        <Route index element={<Home />} />
         <Route path="auth/*" element={<Navigate to="/dashboard" />} />
         <Route path="dashboard" element={<DashboardWrapper />} />
         <Route path="features" element={<Features />} />

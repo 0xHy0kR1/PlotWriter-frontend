@@ -18,7 +18,7 @@ const MasterLayout = () => {
   }, [location.key])
 
   // Determine whether to show the sidebar based on the current route(sidebar not render on homepage)
-  const showSidebar = location.pathname === '/';
+  const showTopbar = location.pathname === '/';
 
   return (
     <PageDataProvider>
@@ -26,7 +26,6 @@ const MasterLayout = () => {
         <div className='app-page flex-column flex-column-fluid' id='kt_app_page'>
           <HeaderWrapper />
           <div className='app-wrapper flex-column flex-row-fluid' id='kt_app_wrapper'>
-            {!showSidebar && <Sidebar />}
             <div className='app-main flex-column flex-row-fluid' id='kt_app_main'>
               <div className='d-flex flex-column flex-column-fluid'>
                 {/* <ToolbarWrapper /> */}

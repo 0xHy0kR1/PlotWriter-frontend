@@ -29,17 +29,6 @@ const Header: FC = () => {
       id='kt_app_header_menu'
       data-kt-menu='true'
     >
-      {pathname === '/' && (
-        <div className='d-flex align-items-center flex-grow-1 flex-lg-grow-0'>
-          <Link to='/' className='d-lg-none'>
-            <img
-              alt='Logo'
-              src={logo}
-              className='h-30px'
-            />
-          </Link>
-        </div>
-      )}
       <MenuInner />
     </div>
   )

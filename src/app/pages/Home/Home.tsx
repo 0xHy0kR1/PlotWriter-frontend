@@ -1,5 +1,4 @@
 // src/app/pages/Home/Home.tsx
-import React from 'react';
 import { Container, Row, Col, Card, Button } from "react-bootstrap";
 import home_top_right from "./../../../../src/assets/home_top_right.png";
 import builder from "./../../../../src/assets/presentation_builder.png";
@@ -9,10 +8,7 @@ import analytics from "./../../../../src/assets/analytics.png"
 import script_breakdown from "./../../../../src/assets/script_breakdown.png"
 import "./Home.css";
 import { TypeAnimation } from "react-type-animation";
-import { Link, } from "react-router-dom";
 import { motion } from "framer-motion"
-import Marquee, { Motion, randomIntFromInterval } from "react-marquee-slider";
-import times from "lodash/times";
 import Reviews from '../../../_metronic/partials/reviews/reviews';
 import { withSize } from 'react-sizeme';
 

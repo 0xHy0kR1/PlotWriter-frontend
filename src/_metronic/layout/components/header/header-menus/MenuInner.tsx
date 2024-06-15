@@ -10,7 +10,6 @@ export function MenuInner() {
   const { pathname } = useLocation();
   return (
     <>
-    {pathname === '/' && (
         <div className='d-flex align-items-center flex-grow-1 flex-lg-grow-0'>
           <Link to='/' className=''>
             <img
@@ -20,12 +19,15 @@ export function MenuInner() {
             />
           </Link>
         </div>
-      )}
-      <MenuItem title={intl.formatMessage({id: 'MENU.DASHBOARD'})} to='/dashboard' />
-      <MenuItem title='Features' to='/features' />
-      <MenuItem title='Construct script' to='/script' />
+        <MenuItem title={intl.formatMessage({id: 'MENU.DASHBOARD'})} to='/dashboard' />
+        {pathname === '/' && (
+          <>
+            <MenuItem title='Features' to='/features' />
+            <MenuItem title='Construct script' to='/script' />
 
-      <MenuItem title='Blogs' to='/blogs' />
+            <MenuItem title='Blogs' to='/blogs' />
+          </>
+      )}
     </>
   )
 }
