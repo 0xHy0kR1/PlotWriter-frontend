@@ -14,7 +14,6 @@ import CancelIcon from "@mui/icons-material/Cancel";
 import IconButton from "@mui/material/IconButton";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import Stack from "@mui/material/Stack";
-import axios from "axios";
 import { useThemeMode } from "./../../../_metronic/partials/layout/theme-mode/ThemeModeProvider";
 import FormControl from "@mui/material/FormControl";
 import Popover from "@mui/material/Popover";
@@ -22,8 +21,7 @@ import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
 import { InputLabel, CircularProgress } from "@mui/material";
-
-const API_URL = import.meta.env.VITE_APP_API_URL;
+import { createScript, suggestTitles } from "./../../../app/services/scriptService";
 
 const style = {
   position: "absolute" as "absolute",
@@ -80,6 +78,10 @@ const CreateScriptModal: React.FC<CreateScriptModalProps> = ({
   const [titleSuggestions, setTitleSuggestions] = useState<string[]>([]);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [loading, setLoading] = useState(false);
+// Disable submit buttons based on input fields
+const isFeatureSubmitDisabled = !title || !synopsis || !genre;
+const isShortSubmitDisabled = !title || !socialMedia || !content;
+
 
   const titleInputRef = useRef<null | HTMLInputElement>(null);
 
@@ -89,34 +91,26 @@ const CreateScriptModal: React.FC<CreateScriptModalProps> = ({
   const handleSubmit = async () => {
     setLoading(true);
     try {
-      const authDataString = localStorage.getItem("kt-auth-react-v");
-      if (!authDataString) {
-        throw new Error("User authentication data not found in localStorage");
-      }
-
-      const authData = JSON.parse(authDataString);
-      const token = authData?.api_token;
-
-      if (!token) {
-        throw new Error("User token not found in authentication data");
-      }
-      await axios.post(`${API_URL}/scripts/create`, 
-      {
+      
+      const data = {
         title,
         synopsis,
         genre,
         content,
         socialMedia,
-      }, 
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+      };
+
+      const response = await createScript(data);
+
+      if (response.success) {
+        onRequestClose(); // Close the modal after successful submission
+      } else {
+        console.error("Error creating script", response.message);
       }
-    );
-      onRequestClose(); // Close the modal after successful submission
     } catch (error) {
       console.error("Error creating script", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -136,17 +130,8 @@ const CreateScriptModal: React.FC<CreateScriptModalProps> = ({
         throw new Error("User token not found in authentication data");
       }
 
-      const response = await axios.post(
-        `${API_URL}/scripts/title-suggestions`,
-        { synopsis },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      console.log("response.data.titles: ", response.data.titles);
-      setTitleSuggestions(response.data.titles);
+      const titles = await suggestTitles(token, { synopsis });
+      setTitleSuggestions(titles);
       setAnchorEl(titleInputRef.current);
     } catch (error) {
       console.error("Error fetching title suggestions", error);
@@ -170,6 +155,7 @@ const CreateScriptModal: React.FC<CreateScriptModalProps> = ({
         borderBottomColor:
           mode === "dark" || mode === "system" ? "#fff" : "#000",
       },
+      
       "&.Mui-focused fieldset": {
         borderBottomColor:
           mode === "dark" || mode === "system" ? "#fff" : "#000",
@@ -177,6 +163,10 @@ const CreateScriptModal: React.FC<CreateScriptModalProps> = ({
       "& fieldset": {
         borderColor: "transparent",
       },
+      "&.MuiInputBase-input": {
+        color: 
+          mode === "dark" || mode === "system" ? "#fff" : "#000"
+      }
     },
     "& .MuiOutlinedInput-notchedOutline": {
       border: "none",
@@ -205,11 +195,15 @@ const CreateScriptModal: React.FC<CreateScriptModalProps> = ({
       "& fieldset": {
         borderColor: "transparent",
       },
-    },
-    "& .MuiOutlinedInput-input": {
-      borderBottom: `2px solid ${
-        mode === "dark" || mode === "system" ? "#fff" : "#000"
-      }`,
+      "& .MuiInputBase-input": {
+        color: mode === "dark" || mode === "system" ? "#fff" : "#000",
+      },
+      "& .MuiSelect-select": {
+        color: mode === "dark" || mode === "system" ? "#fff" : "#000",
+      },
+      "& .MuiSvgIcon-root": {
+        color: mode === "dark" || mode === "system" ? "#fff" : "#000",
+      },
     },
     "& .MuiOutlinedInput-notchedOutline": {
       border: "none",
@@ -219,9 +213,6 @@ const CreateScriptModal: React.FC<CreateScriptModalProps> = ({
     },
     "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
       border: "none",
-    },
-    "& .MuiSvgIcon-root": {
-      color: mode === "dark" || mode === "system" ? "#fff" : "#000",
     },
   });
 
@@ -248,6 +239,7 @@ const CreateScriptModal: React.FC<CreateScriptModalProps> = ({
       color: mode === "dark" || "system" ? "#fff" : "#000",
       border: mode === "dark" || "system" ? "2px solid #fff" : "2px solid #000",
     },
+    color: mode === "dark" || "system" ? "#000" : "#fff",
   };
 
   return (
@@ -385,13 +377,20 @@ const CreateScriptModal: React.FC<CreateScriptModalProps> = ({
           <Box>
             <Typography variant="h6">Feature Film Details</Typography>
             <TextField
+              required
               label="Title"
+              variant="outlined"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              fullWidth
-              margin="normal"
-              InputLabelProps={{ style: { color: labelColor } }}
-              sx={getBottomBorderStyle()}
+              sx={{
+                ...getBottomBorderStyle(),
+                "& .MuiInputBase-input": {
+                  color: labelColor,
+                },
+              }}
+              InputLabelProps={{
+                style: { color: labelColor },
+              }}
               inputRef={titleInputRef}
             />
             <Box
@@ -472,8 +471,9 @@ const CreateScriptModal: React.FC<CreateScriptModalProps> = ({
                 placeholder: "Write a title about...", // Placeholder text
               }}
               sx={getBottomBorderStyle()}
+              required
             />
-            <FormControl fullWidth>
+            <FormControl sx={getSelectStyles()} fullWidth>
               <InputLabel
                 id="demo-simple-select-label"
                 sx={{ color: labelColor }}
@@ -486,7 +486,13 @@ const CreateScriptModal: React.FC<CreateScriptModalProps> = ({
                 fullWidth
                 margin="dense"
                 label="Genre"
-                sx={getSelectStyles()}
+                MenuProps={{
+                  PaperProps: {
+                    sx: {
+                      color: mode === "dark" || mode === "system" ? "#fff" : "#000",
+                    },
+                  },
+                }}
               >
                 <MenuItem value="action" sx={menuItemHoverStyle}>
                   Action
@@ -505,7 +511,7 @@ const CreateScriptModal: React.FC<CreateScriptModalProps> = ({
               <Button sx={buttonStyles} onClick={handlePreviousStep}>
                 Back
               </Button>
-              <Button sx={buttonStyles} onClick={handleSubmit}>
+              <Button sx={buttonStyles} onClick={handleSubmit} disabled={isFeatureSubmitDisabled}>
                 Submit
               </Button>
             </Stack>
@@ -528,8 +534,9 @@ const CreateScriptModal: React.FC<CreateScriptModalProps> = ({
                 placeholder: "Write a video script about...", // Placeholder text
               }}
               sx={getBottomBorderStyle()}
+              required
             />
-            <FormControl fullWidth>
+            <FormControl sx={getSelectStyles()} fullWidth>
               <InputLabel
                 id="demo-simple-select-label"
                 sx={{ color: labelColor }}
@@ -541,11 +548,13 @@ const CreateScriptModal: React.FC<CreateScriptModalProps> = ({
                 onChange={(e) => setSocialMedia(e.target.value as string)}
                 fullWidth
                 margin="dense"
-                inputProps={{
-                  "data-testid": "select_field",
-                  style: { color: labelColor }, // Combine both styles into a single inputProps object
+                MenuProps={{
+                  PaperProps: {
+                    sx: {
+                      color: mode === "dark" || mode === "system" ? "#fff" : "#000",
+                    },
+                  },
                 }}
-                sx={getSelectStyles()}
               >
                 <MenuItem value="tiktok" sx={menuItemHoverStyle}>
                   TikTok
@@ -576,10 +585,10 @@ const CreateScriptModal: React.FC<CreateScriptModalProps> = ({
 
             <Divider orientation="vertical" variant="middle" flexItem />
             <Stack direction="row" justifyContent="space-between" spacing={2}>
-              <Button sx={buttonStyles} onClick={handlePreviousStep}>
+              <Button sx={buttonStyles} onClick={handlePreviousStep} variant="outlined">
                 Back
               </Button>
-              <Button sx={buttonStyles} onClick={handleSubmit}>
+              <Button sx={buttonStyles} onClick={handleSubmit} disabled={isShortSubmitDisabled} variant="outlined">
                 Submit
               </Button>
             </Stack>
