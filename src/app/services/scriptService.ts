@@ -18,7 +18,8 @@ export const createScript = async (data: any) => {
       },
     });
 
-    if (response.status === 200) {
+    console.log("scriptService response: "+JSON.stringify(response));
+    if (response.status === 201) {
       return { success: true, message: 'Script created successfully' };
     } else {
       return { success: false, message: 'Script creation failed' };
@@ -42,7 +43,8 @@ export const getScripts = async () => {
     });
 
     if (response.status === 200) {
-      return { success: true, message: 'Scripts retrieved successfully', scripts: response.data.scripts };
+      console.log("scriptService 200: ", response);
+      return { success: true, message: 'Scripts retrieved successfully', scripts: response.data };
     } else {
       return { success: false, message: 'Failed to retrieve scripts' };
     }

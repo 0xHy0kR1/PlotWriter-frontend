@@ -22,6 +22,7 @@ import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
 import { InputLabel, CircularProgress } from "@mui/material";
 import { createScript, suggestTitles } from "./../../../app/services/scriptService";
+import { toast } from 'react-toastify';
 
 const style = {
   position: "absolute" as "absolute",
@@ -90,6 +91,7 @@ const isShortSubmitDisabled = !title || !socialMedia || !content;
 
   const handleSubmit = async () => {
     setLoading(true);
+    toast.info('Submitting script...');
     try {
       
       const data = {
@@ -101,14 +103,17 @@ const isShortSubmitDisabled = !title || !socialMedia || !content;
       };
 
       const response = await createScript(data);
-
+      console.log("response: ", response);
       if (response.success) {
         onRequestClose(); // Close the modal after successful submission
+        toast.success('Script created successfully!');
       } else {
         console.error("Error creating script", response.message);
+        toast.error('Error creating script');
       }
     } catch (error) {
       console.error("Error creating script", error);
+      toast.error('Error creating script');
     } finally {
       setLoading(false);
     }
@@ -116,6 +121,7 @@ const isShortSubmitDisabled = !title || !socialMedia || !content;
 
   const handleSuggestTitles = async () => {
     setLoading(true);
+    toast.info('Fetching title suggestions...');
     console.log("handleSuggestTitles");
     try {
       const authDataString = localStorage.getItem("kt-auth-react-v");
@@ -131,10 +137,18 @@ const isShortSubmitDisabled = !title || !socialMedia || !content;
       }
 
       const titles = await suggestTitles(token, { synopsis });
+
+      if (titles.length === 0) {
+        toast.error('No title suggestions available.');
+        return; // Do not set the anchor or title suggestions if there are none
+      }
+      
       setTitleSuggestions(titles);
       setAnchorEl(titleInputRef.current);
+      toast.success('Title suggestions fetched successfully');
     } catch (error) {
       console.error("Error fetching title suggestions", error);
+      toast.error('Error fetching title suggestions');
       // Handle the error (e.g., show a message to the user)
     } finally {
       setLoading(false); // Stop loading

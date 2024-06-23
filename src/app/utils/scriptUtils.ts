@@ -9,6 +9,7 @@ export const fetchScripts = async (setLoading: (loading: boolean) => void, setSc
 
     const response = await getScripts(); // Adjust this based on your actual API call
     const scripts = response.scripts; // Access the scripts property
+    console.log("scripts utils scripts: ", scripts);
     setScripts(scripts);
 
     setLoading(false); // Set loading to false when fetching is complete
