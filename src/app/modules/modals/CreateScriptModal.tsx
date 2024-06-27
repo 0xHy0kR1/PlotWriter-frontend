@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import Box from "@mui/material/Box";
 import Modal from "@mui/material/Modal";
 import Button from "@mui/material/Button";
@@ -21,8 +21,10 @@ import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
 import { InputLabel, CircularProgress } from "@mui/material";
-import { createScript, suggestTitles } from "./../../../app/services/scriptService";
 import { toast } from 'react-toastify';
+import { RootState, AppDispatch } from '../apps/scripts/store';
+import { fetchTitleSuggestions, submitScript, clearTitleSuggestions, addScript } from './../apps/scripts/features/scriptSlice';
+import { useDispatch, useSelector } from 'react-redux';
 
 const style = {
   position: "absolute" as "absolute",
@@ -68,6 +70,7 @@ const CreateScriptModal: React.FC<CreateScriptModalProps> = ({
   isOpen,
   onRequestClose,
 }) => {
+  const dispatch = useDispatch<AppDispatch>();
   const [step, setStep] = useState(1);
   const [format, setFormat] = useState("");
   const [title, setTitle] = useState("");
@@ -76,9 +79,10 @@ const CreateScriptModal: React.FC<CreateScriptModalProps> = ({
   const [content, setContent] = useState("");
   const [socialMedia, setSocialMedia] = useState("");
   const { mode } = useThemeMode();
-  const [titleSuggestions, setTitleSuggestions] = useState<string[]>([]);
+  const titleSuggestions = useSelector((state: RootState) => state.scripts.titleSuggestions);
+  const loading = useSelector((state: RootState) => state.scripts.fetchingTitleSuggestions);
+  const error = useSelector((state: RootState) => state.scripts.error);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [loading, setLoading] = useState(false);
 // Disable submit buttons based on input fields
 const isFeatureSubmitDisabled = !title || !synopsis || !genre;
 const isShortSubmitDisabled = !title || !socialMedia || !content;
@@ -89,69 +93,29 @@ const isShortSubmitDisabled = !title || !socialMedia || !content;
   const handleNextStep = () => setStep(step + 1);
   const handlePreviousStep = () => setStep(step - 1);
 
-  const handleSubmit = async () => {
-    setLoading(true);
-    toast.info('Submitting script...');
-    try {
-      
-      const data = {
-        title,
-        synopsis,
-        genre,
-        content,
-        socialMedia,
-      };
-
-      const response = await createScript(data);
-      console.log("response: ", response);
-      if (response.success) {
-        onRequestClose(); // Close the modal after successful submission
-        toast.success('Script created successfully!');
-      } else {
-        console.error("Error creating script", response.message);
-        toast.error('Error creating script');
+  const handleSubmit = () => {
+    const data = {
+      title,
+      synopsis,
+      genre,
+      content,
+      socialMedia,
+    };
+    dispatch(submitScript(data)).then((result) => {
+      if (submitScript.fulfilled.match(result)) {
+        onRequestClose();
       }
-    } catch (error) {
-      console.error("Error creating script", error);
-      toast.error('Error creating script');
-    } finally {
-      setLoading(false);
-    }
+    });
   };
 
-  const handleSuggestTitles = async () => {
-    setLoading(true);
-    toast.info('Fetching title suggestions...');
-    console.log("handleSuggestTitles");
-    try {
-      const authDataString = localStorage.getItem("kt-auth-react-v");
-      if (!authDataString) {
-        throw new Error("User authentication data not found in localStorage");
-      }
-
-      const authData = JSON.parse(authDataString);
-      const token = authData?.api_token;
-
-      if (!token) {
-        throw new Error("User token not found in authentication data");
-      }
-
-      const titles = await suggestTitles(token, { synopsis });
-
-      if (titles.length === 0) {
-        toast.error('No title suggestions available.');
-        return; // Do not set the anchor or title suggestions if there are none
-      }
-      
-      setTitleSuggestions(titles);
+  const handleSuggestTitles = () => {
+    if (synopsis.trim()) {
+      dispatch(clearTitleSuggestions());
+      dispatch(fetchTitleSuggestions(synopsis));
+      console.log("titleInputRef.current: ", titleInputRef.current)
       setAnchorEl(titleInputRef.current);
-      toast.success('Title suggestions fetched successfully');
-    } catch (error) {
-      console.error("Error fetching title suggestions", error);
-      toast.error('Error fetching title suggestions');
-      // Handle the error (e.g., show a message to the user)
-    } finally {
-      setLoading(false); // Stop loading
+    } else {
+      toast.error('Please provide a synopsis for title suggestions.');
     }
   };
 
@@ -159,6 +123,9 @@ const isShortSubmitDisabled = !title || !socialMedia || !content;
     setTitle(selectedTitle);
     setAnchorEl(null);
   };
+
+  
+  
 
   const getBottomBorderStyle = () => ({
     "& .MuiOutlinedInput-root": {

@@ -1,15 +1,19 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { CircularProgress, Grid } from '@mui/material';
 import ScriptCard from './../ScriptWriting/ScriptCard';
-import { fetchScripts } from './../../utils/scriptUtils';
+import { fetchScripts } from './../../modules/apps/scripts/features/scriptSlice';
+import { RootState, AppDispatch } from './../../../app/modules/apps/scripts/store';
 
 const DashboardPage: React.FC = () => {
-  const [loading, setLoading] = useState<boolean>(true);
-  const [scripts, setScripts] = useState<any[]>([]);
+  const dispatch = useDispatch<AppDispatch>();
+  const scripts = useSelector((state: RootState) => state.scripts.scripts);
+  const loading = useSelector((state: RootState) => state.scripts.fetchingScripts);
+
 
   useEffect(() => {
-    fetchScripts(setLoading, setScripts);
-  }, []);
+    dispatch(fetchScripts());
+  }, [dispatch]);
 
   if (loading) {
     return <CircularProgress />;

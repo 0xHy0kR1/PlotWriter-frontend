@@ -20,7 +20,7 @@ export const createScript = async (data: any) => {
 
     console.log("scriptService response: "+JSON.stringify(response));
     if (response.status === 201) {
-      return { success: true, message: 'Script created successfully' };
+      return { success: true, message: 'Script creation successful' , data: response.data};
     } else {
       return { success: false, message: 'Script creation failed' };
     }
