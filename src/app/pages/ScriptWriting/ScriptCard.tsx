@@ -14,6 +14,7 @@ interface ScriptCardProps {
     genre?: string;
     synopsis: string;
     socialMedia?: string;
+    content: string;
   };
 }
 
@@ -25,7 +26,8 @@ const ScriptCard: React.FC<ScriptCardProps> = ({ script }) => {
   const textColor = theme.palette.mode === 'dark' ? theme.palette.text.primary : theme.palette.text.secondary;
   const iconColor = theme.palette.mode === 'dark' ? theme.palette.primary.light : theme.palette.primary.dark;
 
-  const { title, updatedAt, genre, synopsis, socialMedia } = script;
+  console.log("script from ScriptCard: " + script);
+  const { title, updatedAt, genre, synopsis, socialMedia, content } = script;
 
   const getGenreText = () => {
     if (genre === '') {
@@ -61,7 +63,7 @@ const ScriptCard: React.FC<ScriptCardProps> = ({ script }) => {
         </Stack>
         <Stack direction="row" justifyContent="flex-start" spacing={3.7} alignItems="center">
           <Typography variant="body1" sx={{ fontWeight: 'bold', color: textColor }}>Synopsis</Typography>
-          <Typography variant="body2" sx={{ color: textColor }}>{synopsis}</Typography>
+          <Typography variant="body2" sx={{ color: textColor }}>{synopsis ? synopsis : content}</Typography>
         </Stack>
         <Divider sx={{ my: 2, borderColor: textColor }} />
         <Stack direction="row" justifyContent="space-between">

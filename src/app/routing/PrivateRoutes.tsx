@@ -11,6 +11,7 @@ import Home from '../pages/Home/Home';
 import ScriptWriting from '../pages/ScriptWriting/ScriptWriting'
 import Blogs from '../pages/Blogs/Blogs';
 import Features from '../pages/Features/Features';
+import Editor from '../pages/actions/editor';
 
 const PrivateRoutes: FC = () => {
   const ProfilePage = lazy(() => import('../modules/profile/ProfilePage'));
@@ -29,56 +30,9 @@ const PrivateRoutes: FC = () => {
         <Route path="menu-test" element={<MenuTestPage />} />
         <Route path="script" element={<ScriptWriting />} />
         <Route path="blogs" element={<Blogs />} />
-        {/* <Route
-          path="crafted/pages/profile/*"
-          element={
-            <SuspensedView>
-              <ProfilePage />
-            </SuspensedView>
-          }
-        />
-        <Route
-          path="crafted/pages/wizards/*"
-          element={
-            <SuspensedView>
-              <WizardsPage />
-            </SuspensedView>
-          }
-        />
-        <Route
-          path="crafted/widgets/*"
-          element={
-            <SuspensedView>
-              <WidgetsPage />
-            </SuspensedView>
-          }
-        />
-        <Route
-          path="crafted/account/*"
-          element={
-            <SuspensedView>
-              <AccountPage />
-            </SuspensedView>
-          }
-        />
-        <Route
-          path="apps/chat/*"
-          element={
-            <SuspensedView>
-              <ChatPage />
-            </SuspensedView>
-          }
-        />
-        <Route
-          path="apps/user-management/*"
-          element={
-            <SuspensedView>
-              <UsersPage />
-            </SuspensedView>
-          }
-        /> */}
         <Route path="*" element={<Navigate to="/error/404" />} />
       </Route>
+      <Route path="editor" element={<Editor />} />
     </Routes>
   );
 };

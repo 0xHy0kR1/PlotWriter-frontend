@@ -25,6 +25,7 @@ import { toast } from 'react-toastify';
 import { RootState, AppDispatch } from '../apps/scripts/store';
 import { fetchTitleSuggestions, submitScript, clearTitleSuggestions, addScript } from './../apps/scripts/features/scriptSlice';
 import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 
 const style = {
   position: "absolute" as "absolute",
@@ -93,6 +94,8 @@ const isShortSubmitDisabled = !title || !socialMedia || !content;
   const handleNextStep = () => setStep(step + 1);
   const handlePreviousStep = () => setStep(step - 1);
 
+  const navigate = useNavigate();
+
   const handleSubmit = () => {
     const data = {
       title,
@@ -104,6 +107,7 @@ const isShortSubmitDisabled = !title || !socialMedia || !content;
     dispatch(submitScript(data)).then((result) => {
       if (submitScript.fulfilled.match(result)) {
         onRequestClose();
+        navigate('/editor');
       }
     });
   };
