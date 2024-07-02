@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { createScript, suggestTitles, getScripts } from '../../../../services/scriptService';
+import { createScript, suggestTitles, getScripts, getEditorContent  } from '../../../../services/scriptService';
 import { toast } from 'react-toastify';
 
 // Define the shape of the script-related state
@@ -10,6 +10,7 @@ interface Script {
   genre?: string;
   synopsis: string;
   socialMedia?: string;
+  content?: string;
 }
 
 
@@ -18,7 +19,13 @@ interface ScriptState {
   titleSuggestions: Array<string>;
   fetchingScripts: boolean; // Separate loading state for fetching scripts
   fetchingTitleSuggestions: boolean; // Separate loading state for fetching title suggestions
+  fetchingEditorContent: boolean; // Separate loading state for fetching editor content
   error: string | null;
+  editorContent: {
+    scriptSample: string;
+    characters: string[];
+    scenes: string[];
+  } | null;
 }
 
 // Initialize the state
@@ -27,8 +34,32 @@ const initialState: ScriptState = {
   titleSuggestions: [],
   fetchingScripts: false,
   fetchingTitleSuggestions: false,
+  fetchingEditorContent: false,
   error: null,
+  editorContent: null,
 };
+
+// Async thunk for fetching editor content 
+export const fetchEditorContent = createAsyncThunk<
+{ scriptSample: string; characters: string[]; scenes: string[] }, 
+{ id: string; synopsis: string; genre: string; socialMedia: string; content: string },
+{ rejectValue: string } 
+>(
+    'scripts/fetchEditorContent',
+    async(scriptData, { rejectWithValue }) => {
+      try{
+        const response = await getEditorContent(scriptData)
+        if(response.success){
+          console.log("response from fetchEditorContent: ", response)
+          return response.data;
+        } else{
+          throw new Error(response.message);
+        }
+      } catch(error: any){
+        return rejectWithValue(error.message);
+      }
+    }
+  )
 
 // Async thunk for fetching scripts
 export const fetchScripts = createAsyncThunk<Script[], void, { rejectValue: string }>(
@@ -86,15 +117,31 @@ export const fetchTitleSuggestions = createAsyncThunk<string[], string, { reject
 // Async thunk for submitting a new script
 export const submitScript = createAsyncThunk<any, any, { rejectValue: string }>(
   'scripts/submitScript',
-  async (scriptData: any, { rejectWithValue }) => {
+  async (scriptData: any, { rejectWithValue, dispatch }) => {
     try {
-      const response = await createScript(scriptData);
-      console.log("response from scriptSlice: ", response)
-      if (response.success) {
-        toast.success('Script created successfully!');
-        return response.data;
-      } else {
-        throw new Error(response.message);
+      console.log("scriptData submitScript thunk", scriptData)
+      
+      // Fetching editor content
+      const editorContentResponse = await dispatch(fetchEditorContent({ 
+        id: scriptData.id, 
+        synopsis: scriptData.synopsis, 
+        genre: scriptData.genre, 
+        socialMedia: scriptData.socialMedia, 
+        content: scriptData.content 
+      }));
+      if(fetchEditorContent.fulfilled.match(editorContentResponse)){
+        const editorContent = editorContentResponse.payload;
+
+        // Now create the script with the fetched editor content
+        const scriptResponse = await createScript({ ...scriptData, ...editorContent})
+        console.log("response from submitScript: ", scriptResponse)
+
+        if(scriptResponse.success){
+          toast.success('Script created successfully!');
+          return scriptResponse.data;
+        } else {
+          throw new Error(scriptResponse.message);
+        }
       }
     } catch (error: any) {
       toast.error('Error creating script');
@@ -115,6 +162,12 @@ const scriptSlice = createSlice({
     // Reducer to clear title suggestions
     clearTitleSuggestions: (state) => {
       state.titleSuggestions = [];
+    },
+    // Reducer to update editor content
+    updateEditorContent: (state, action: PayloadAction<string>) => { 
+      if (state.editorContent) {
+        state.editorContent.scriptSample = action.payload;
+      }
     },
   },
   extraReducers: (builder) => {
@@ -164,11 +217,25 @@ const scriptSlice = createSlice({
         state.error = action.payload as string;
         state.fetchingScripts = false;
         toast.error('Error creating script');
-      });
+      })
+      // Handle the pending state when fetching editor content
+      .addCase(fetchEditorContent.pending, (state)=>{
+        toast.info('Fetching editor content...');
+      })
+      // Handle the fulfilled state when editor content is fetched successfully
+      .addCase(fetchEditorContent.fulfilled, (state, action) => {
+        state.editorContent = action.payload;
+        toast.success('Script content fetched successfully')
+      })
+      // Handle the rejected state when fetching editor content fails
+      .addCase(fetchEditorContent.rejected, (state, action) => {
+        state.error = action.payload as string;
+        toast.error('Error fetching editor content')
+      })
   },
 });
 
 
-export const { addScript, clearTitleSuggestions } = scriptSlice.actions;
+export const { addScript, clearTitleSuggestions, updateEditorContent } = scriptSlice.actions;
 
 export default scriptSlice.reducer;

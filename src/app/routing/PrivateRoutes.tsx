@@ -11,7 +11,7 @@ import Home from '../pages/Home/Home';
 import ScriptWriting from '../pages/ScriptWriting/ScriptWriting'
 import Blogs from '../pages/Blogs/Blogs';
 import Features from '../pages/Features/Features';
-import Editor from '../pages/actions/editor';
+import Editor from '../pages/actions/Editor';
 
 const PrivateRoutes: FC = () => {
   const ProfilePage = lazy(() => import('../modules/profile/ProfilePage'));
@@ -32,7 +32,7 @@ const PrivateRoutes: FC = () => {
         <Route path="blogs" element={<Blogs />} />
         <Route path="*" element={<Navigate to="/error/404" />} />
       </Route>
-      <Route path="editor" element={<Editor />} />
+      <Route path="editor/:id" element={<Editor />} />
     </Routes>
   );
 };

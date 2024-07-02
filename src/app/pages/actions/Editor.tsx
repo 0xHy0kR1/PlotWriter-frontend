@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Box, Button, IconButton, Typography, Divider, Drawer, List, ListItem, ListItemText } from '@mui/material';
 import UndoIcon from '@mui/icons-material/Undo';
 import RedoIcon from '@mui/icons-material/Redo';
@@ -9,26 +9,49 @@ import FormatPaintIcon from '@mui/icons-material/FormatPaint';
 import CommentIcon from '@mui/icons-material/Comment';
 import LightbulbIcon from '@mui/icons-material/Lightbulb';
 import CharacterModal from './../../modules/modals/CharacterModal';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState } from './../../../app/modules/apps/scripts/store';
+import { updateEditorContent } from './../../../app/modules/apps/scripts/features/scriptSlice';
 
 const MyEditor: React.FC = () => {
   const editorRef = useRef<HTMLDivElement>(null);
   const [copilot, setCopilot] = useState(false);
   const [isCharacterModalOpen, setCharacterModalOpen] = useState(false);
-  const [editorContent, setEditorContent] = useState('');
   const [showScenes, setShowScenes] = useState(false);
   const [showCharacters, setShowCharacters] = useState(false);
-
   const handleToggleCopilot = () => setCopilot(!copilot);
+  const dispatch = useDispatch();
+  const { editorContent, fetchingEditorContent, error } = useSelector((state: RootState) => state.scripts);
 
-  const scenes = ["Scene 1", "Scene 2", "Scene 3"];
-  const characters = ["Character 1", "Character 2", "Character 3"];
+  const parseContent = (content: string) => {
+    // Use regular expressions to identify and wrap parts of the content
+    let formattedContent = content
+      .replace(/## (.*?) \*\*Logline:\*\*/g, '<h2>$1</h2><strong>Logline:</strong>') // For title and logline
+      .replace(/\*\*Characters:\*\*/g, '<h3>Characters:</h3>') // For characters heading
+      .replace(/\* \*\*(.*?):\*\*/g, '<p><strong>$1:</strong>') // For character names
+      .replace(/^\*\*/gm, '<br><br><strong>') // For scene headings
+      .replace(/\*\*$/, '</strong><br>') // For end of scene headings
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // For bold text
+      .replace(/\* (.*?)$/gm, '<li>$1</li>'); // For list items
+  
+    return formattedContent;
+  };
+
+  useEffect(() => {
+    if(editorRef.current && editorContent){
+      const formattedContent = parseContent(editorContent.scriptSample)
+      editorRef.current.innerHTML = formattedContent;
+    }
+    console.log("editorContent: " + JSON.stringify(editorContent));
+  }, [editorContent])
 
   const handleCharacterClick = () => {
     setCharacterModalOpen(true);
   };
 
-  const handleEditorChange = (event: React.ChangeEvent<HTMLDivElement>) => {
-    setEditorContent(event.target.innerHTML);
+  const handleEditorChange = (event: React.FormEvent<HTMLDivElement>) => {
+    const content = event.currentTarget.innerHTML;
+    dispatch(updateEditorContent(content));
   };
 
   const toggleScenes = () => {
@@ -87,7 +110,7 @@ const MyEditor: React.FC = () => {
             </Typography>
             {showScenes && (
               <List sx={{ border: '2px solid black', overflowY: 'auto', flexGrow: 1 }}>
-                {scenes.map((scene, index) => (
+                {editorContent?.scenes.map((scene, index) => (
                   <ListItem button key={index} onClick={() => handleSceneClick(scene)}>
                     <ListItemText primary={scene} />
                   </ListItem>
@@ -111,7 +134,7 @@ const MyEditor: React.FC = () => {
             </Typography>
             {showCharacters && (
               <List sx={{ border: '2px solid black', overflowY: 'auto', flexGrow: 1 }}>
-                {characters.map((character, index) => (
+                {editorContent?.characters.map((character, index) => (
                   <ListItem button key={index} onClick={handleCharacterClick}>
                     <ListItemText primary={character} />
                   </ListItem>
@@ -168,7 +191,13 @@ const MyEditor: React.FC = () => {
             padding: '16px',
             overflow: 'auto',
             backgroundColor: 'white',
-            outline: 'none'
+            outline: 'none',
+            '& h2': { fontSize: '1.5em', margin: '0.5em 0' },
+            '& h3': { fontSize: '1.2em', margin: '0.5em 0' },
+            '& p': { margin: '0.5em 0' },
+            '& strong': { fontWeight: 'bold' },
+            '& li': { margin: '0.5em 0', listStyleType: 'disc', marginLeft: '20px' },
+            '& br': { display: 'block', margin: '0.5em 0' },
           }}
           onInput={handleEditorChange}
         ></Box>

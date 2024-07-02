@@ -23,7 +23,7 @@ import ListItemText from "@mui/material/ListItemText";
 import { InputLabel, CircularProgress } from "@mui/material";
 import { toast } from 'react-toastify';
 import { RootState, AppDispatch } from '../apps/scripts/store';
-import { fetchTitleSuggestions, submitScript, clearTitleSuggestions, addScript } from './../apps/scripts/features/scriptSlice';
+import { fetchTitleSuggestions, submitScript, clearTitleSuggestions } from './../apps/scripts/features/scriptSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
@@ -106,8 +106,12 @@ const isShortSubmitDisabled = !title || !socialMedia || !content;
     };
     dispatch(submitScript(data)).then((result) => {
       if (submitScript.fulfilled.match(result)) {
+        console.log("result.payload in CreateScriptModal.tsx: ", result.payload)
+        const userId = result.payload.userId;
+        console.log("userId in CreateScriptModal", userId);
+        console.log("result CreateScriptModal", result);
         onRequestClose();
-        navigate('/editor');
+        navigate(`/editor/${userId}`);
       }
     });
   };

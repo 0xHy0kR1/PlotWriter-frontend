@@ -145,3 +145,30 @@ export const suggestTitles = async (token: string, { synopsis }: { synopsis: str
     }
   }
 };
+
+// Function to fetch editor content
+export const getEditorContent = async(scriptData: { id: string; synopsis: string; genre: string; socialMedia: string; content: string }) => {
+  try{
+    const response = await axios.post(`${BASE_URL}/editor/${scriptData.id}`, {
+      synopsis: scriptData.synopsis,
+      genre: scriptData.genre,
+      socialMedia: scriptData.socialMedia,
+      content: scriptData.content,
+    }, {
+      headers: {
+        'Authorization': `Bearer ${authToken}`,
+      },
+    });
+    if(response.status === 200){
+      return { success: true, data: response.data};
+    } else{
+      return { success: false, message: 'Failed to fetch editor content'}
+    }
+  } catch(error){
+    if(isError(error)){
+      return { success: false, message: 'Failed to fetch editor content', error: error.message };
+    } else {
+      return { success: false, message: 'Failed to fetch editor content', error: 'Unknown error occurred' };
+    }
+  }
+};
