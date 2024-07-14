@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState } from "react";
 import Box from "@mui/material/Box";
 import Modal from "@mui/material/Modal";
 import Button from "@mui/material/Button";
@@ -81,7 +81,9 @@ const CreateScriptModal: React.FC<CreateScriptModalProps> = ({
   const [socialMedia, setSocialMedia] = useState("");
   const { mode } = useThemeMode();
   const titleSuggestions = useSelector((state: RootState) => state.scripts.titleSuggestions);
-  const loading = useSelector((state: RootState) => state.scripts.fetchingTitleSuggestions);
+  const titlesLoading = useSelector((state: RootState) => state.scripts.fetchingTitleSuggestions);
+  const editLoading = useSelector((state: RootState) => state.scripts.fetchingEditorContent);
+
   const error = useSelector((state: RootState) => state.scripts.error);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 // Disable submit buttons based on input fields
@@ -107,11 +109,10 @@ const isShortSubmitDisabled = !title || !socialMedia || !content;
     dispatch(submitScript(data)).then((result) => {
       if (submitScript.fulfilled.match(result)) {
         console.log("result.payload in CreateScriptModal.tsx: ", result.payload)
-        const userId = result.payload.userId;
-        console.log("userId in CreateScriptModal", userId);
+        const scriptId = result.payload._id;
         console.log("result CreateScriptModal", result);
         onRequestClose();
-        navigate(`/editor/${userId}`);
+        navigate(`/editor/${scriptId}`);
       }
     });
   };
@@ -410,9 +411,9 @@ const isShortSubmitDisabled = !title || !socialMedia || !content;
                       mode === "dark" || mode === "system" ? "#777" : "#ddd", // Border color for disabled state
                   },
                 }}
-                disabled={loading || !synopsis.trim()} // Disable the button while loading or if synopsis is empty
+                disabled={titlesLoading || !synopsis.trim()} // Disable the button while titlesLoading or if synopsis is empty
               >
-                {loading ? (
+                {titlesLoading ? (
                   <CircularProgress
                     size={24}
                     sx={{ color: buttonStyles.color }}
@@ -422,27 +423,29 @@ const isShortSubmitDisabled = !title || !socialMedia || !content;
                 )}
               </Button>
             </Box>
-            <Popover
-              open={Boolean(anchorEl)}
-              anchorEl={anchorEl}
-              onClose={() => setAnchorEl(null)}
-              anchorOrigin={{
-                vertical: "bottom",
-                horizontal: "right",
-              }}
-            >
-              <List>
-                {titleSuggestions.map((suggestion, index) => (
-                  <ListItem
-                    button
-                    key={index}
-                    onClick={() => handleTitleSelect(suggestion)}
-                  >
-                    <ListItemText primary={suggestion} />
-                  </ListItem>
-                ))}
-              </List>
-            </Popover>
+            {titleSuggestions.length > 0 && (
+              <Popover
+                open={Boolean(anchorEl)}
+                anchorEl={anchorEl}
+                onClose={() => setAnchorEl(null)}
+                anchorOrigin={{
+                  vertical: "bottom",
+                  horizontal: "right",
+                }}
+              >
+                <List>
+                  {titleSuggestions.map((suggestion, index) => (
+                    <ListItem
+                      button
+                      key={index}
+                      onClick={() => handleTitleSelect(suggestion)}
+                    >
+                      <ListItemText primary={suggestion} />
+                    </ListItem>
+                  ))}
+                </List>
+              </Popover>
+            )}
             <TextField
               label="Synopsis"
               value={synopsis}
@@ -500,8 +503,33 @@ const isShortSubmitDisabled = !title || !socialMedia || !content;
               <Button sx={buttonStyles} onClick={handlePreviousStep}>
                 Back
               </Button>
-              <Button sx={buttonStyles} onClick={handleSubmit} disabled={isFeatureSubmitDisabled}>
-                Submit
+              <Button
+                variant="outlined"
+                onClick={handleSubmit}
+                disabled={isFeatureSubmitDisabled}
+                sx={{
+                  ...buttonStyles,
+                  alignSelf: "flex-end",
+                  backgroundColor:
+                    mode === "dark" || mode === "system" ? "#333" : "#ccc",
+                  "&:disabled": {
+                    color:
+                      mode === "dark" || mode === "system" ? "#aaa" : "#555", // Text color for disabled state
+                    backgroundColor:
+                      mode === "dark" || mode === "system" ? "#555" : "#eee", // Background color for disabled state
+                    borderColor:
+                      mode === "dark" || mode === "system" ? "#777" : "#ddd", // Border color for disabled state
+                  },
+                }}
+              >
+                {editLoading ? (
+                  <CircularProgress
+                    size={24}
+                    sx={{ color: buttonStyles.color }}
+                  />
+                ) : (
+                  "Submit"
+                )}
               </Button>
             </Stack>
           </Box>
@@ -554,7 +582,7 @@ const isShortSubmitDisabled = !title || !socialMedia || !content;
               </Select>
             </FormControl>
             <TextField
-              label="Script Content"
+              label="Script Summary"
               value={content}
               onChange={(e) => setContent(e.target.value)}
               fullWidth
@@ -577,8 +605,33 @@ const isShortSubmitDisabled = !title || !socialMedia || !content;
               <Button sx={buttonStyles} onClick={handlePreviousStep} variant="outlined">
                 Back
               </Button>
-              <Button sx={buttonStyles} onClick={handleSubmit} disabled={isShortSubmitDisabled} variant="outlined">
-                Submit
+              <Button
+                variant="outlined"
+                onClick={handleSubmit} 
+                disabled={isShortSubmitDisabled}
+                sx={{
+                  ...buttonStyles,
+                  alignSelf: "flex-end",
+                  backgroundColor:
+                    mode === "dark" || mode === "system" ? "#333" : "#ccc",
+                  "&:disabled": {
+                    color:
+                      mode === "dark" || mode === "system" ? "#aaa" : "#555", // Text color for disabled state
+                    backgroundColor:
+                      mode === "dark" || mode === "system" ? "#555" : "#eee", // Background color for disabled state
+                    borderColor:
+                      mode === "dark" || mode === "system" ? "#777" : "#ddd", // Border color for disabled state
+                  },
+                }}
+              >
+                {editLoading ? (
+                  <CircularProgress
+                    size={24}
+                    sx={{ color: buttonStyles.color }}
+                  />
+                ) : (
+                  "Submit"
+                )}
               </Button>
             </Stack>
           </Box>

@@ -32,7 +32,7 @@ const PrivateRoutes: FC = () => {
         <Route path="blogs" element={<Blogs />} />
         <Route path="*" element={<Navigate to="/error/404" />} />
       </Route>
-      <Route path="editor/:id" element={<Editor />} />
+      <Route path="editor/:scriptId" element={<Editor />} />
     </Routes>
   );
 };

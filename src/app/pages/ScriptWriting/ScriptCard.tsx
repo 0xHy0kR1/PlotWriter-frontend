@@ -6,15 +6,20 @@ import BreakdownIcon from '@mui/icons-material/Assessment'; // Substitute with a
 import StoryboardIcon from '@mui/icons-material/DeveloperBoardSharp'; // Substitute with a relevant icon
 import DeckIcon from '@mui/icons-material/Deck'; // Substitute with a relevant icon
 import { formatDistanceToNow } from 'date-fns';
+import { useNavigate } from 'react-router-dom';
+import { RootState, AppDispatch } from './../../../app/modules/apps/scripts/store';
+import { useSelector, useDispatch } from 'react-redux';
+import { updateEditorContent, fetchSampleScriptById } from './../../../app/modules/apps/scripts/features/scriptSlice';
 
 interface ScriptCardProps {
   script: {
+    _id: string; 
     title: string;
     updatedAt: string;
     genre?: string;
     synopsis: string;
     socialMedia?: string;
-    content: string;
+    content?: string;
   };
 }
 
@@ -25,15 +30,21 @@ const ScriptCard: React.FC<ScriptCardProps> = ({ script }) => {
   const cardBackgroundColor = theme.palette.mode === 'dark' ? theme.palette.background.paper : theme.palette.background.default;
   const textColor = theme.palette.mode === 'dark' ? theme.palette.text.primary : theme.palette.text.secondary;
   const iconColor = theme.palette.mode === 'dark' ? theme.palette.primary.light : theme.palette.primary.dark;
+  const dispatch = useDispatch<AppDispatch>();
 
-  console.log("script from ScriptCard: " + script);
-  const { title, updatedAt, genre, synopsis, socialMedia, content } = script;
+  const navigate = useNavigate();
+
+  const { _id, title, updatedAt, genre, synopsis, socialMedia, content } = script;
 
   const getGenreText = () => {
     if (genre === '') {
       return `Video Short, ${socialMedia}`;
     }
     return genre;
+  };
+
+  const handleEditClick = () => {
+    navigate(`/editor/${_id}`);
   };
 
   const LastEdited = formatDistanceToNow(new Date(updatedAt), { addSuffix: true });
@@ -71,7 +82,7 @@ const ScriptCard: React.FC<ScriptCardProps> = ({ script }) => {
             <ShareIcon />
           </IconButton>
           <Stack direction="row" spacing={1}>
-            <IconButton sx={{ color: iconColor }}>
+            <IconButton sx={{ color: iconColor }} onClick={handleEditClick}>
               <EditIcon />
               <Typography variant="body2" sx={{ color: textColor }}>Editor</Typography>
             </IconButton>

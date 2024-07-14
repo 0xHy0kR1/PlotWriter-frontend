@@ -58,16 +58,16 @@ export const getScripts = async () => {
 };
 
 // Function to update a specific script
-export const updateScript = async (scriptId: string, data: any) => {
+export const updateScriptById = async (scriptId: string, scriptData: any) => {
   try {
-    const response = await axios.put(`${BASE_URL}/update/${scriptId}`, data, {
+    const response = await axios.put(`${BASE_URL}/update/${scriptId}`, scriptData, {
       headers: {
         'Authorization': `Bearer ${authToken}`, // Include the authentication token in the header
       },
     });
 
     if (response.status === 200) {
-      return { success: true, message: 'Script updated successfully' };
+      return { success: true, message: 'Script updated successfully', data: response.data};
     } else {
       return { success: false, message: 'Failed to update the script' };
     }
@@ -147,9 +147,9 @@ export const suggestTitles = async (token: string, { synopsis }: { synopsis: str
 };
 
 // Function to fetch editor content
-export const getEditorContent = async(scriptData: { id: string; synopsis: string; genre: string; socialMedia: string; content: string }) => {
+export const getEditorSampleContent = async(scriptData: { synopsis: string; genre: string; socialMedia: string; content: string }) => {
   try{
-    const response = await axios.post(`${BASE_URL}/editor/${scriptData.id}`, {
+    const response = await axios.post(`${BASE_URL}/sample-script`, {
       synopsis: scriptData.synopsis,
       genre: scriptData.genre,
       socialMedia: scriptData.socialMedia,
@@ -172,3 +172,27 @@ export const getEditorContent = async(scriptData: { id: string; synopsis: string
     }
   }
 };
+
+// Function to fetch a specific script sample by its ID
+export const getScriptSampleById = async (scriptId: string) => {
+  try{
+    const response = await axios.get(`${BASE_URL}/editor/${scriptId}`, {
+      headers: {
+        'Authorization': `Bearer ${authToken}`, 
+      },
+    });
+
+    console.log("response from getScriptSampleById: ", response)
+    if(response.status === 200) {
+      return { success: true, message: 'Script retrieved successfully', data: response.data}
+    } else{
+      return { success: false, message: 'Failed to retrieve script sample' };
+    }
+  } catch (error){
+    if(isError(error)){
+      return { success: false, message: 'Failed to retrieve script sample', error: error.message }
+    } else{
+      return { success: false, message: 'Failed to retrieve script sample'}
+    }
+  }
+}

@@ -1,0 +1,18 @@
+
+  
+  @keyframes highlight {
+    0% {
+      background-color: white;
+      color: black; /* Initial color */
+    }
+    100% {
+      background-color: black;
+      color: white; /* Final color */
+    }
+  }
+  
+  .highlight {
+    animation: highlight 1000ms ease-in-out;
+    background-color: black; /* Ensure initial state is black */
+    color: white; /* Ensure initial text color is white */
+  }

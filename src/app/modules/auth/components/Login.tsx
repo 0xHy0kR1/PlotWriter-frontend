@@ -25,12 +25,6 @@ const initialValues = {
   password: '',
 }
 
-/*
-  Formik+YUP+Typescript:
-  https://jaredpalmer.com/formik/docs/tutorial#getfieldprops
-  https://medium.com/@maurice.de.beijer/yup-validation-and-typescript-and-formik-6c342578a20e
-*/
-
 export function Login() {
   const [loading, setLoading] = useState(false)
   const {saveAuth, setCurrentUser} = useAuth()
@@ -119,19 +113,6 @@ export function Login() {
         <span className='w-125px text-gray-500 fw-semibold fs-7'>Or with email</span>
       </div>
       {/* end::Separator */}
-
-      {formik.status ? (
-        <div className='mb-lg-15 alert alert-danger'>
-          <div className='alert-text font-weight-bold'>{formik.status}</div>
-        </div>
-      ) : (
-        <div className='mb-10 bg-light-info p-8 rounded'>
-          <div className='text-info'>
-            Use account <strong>admin@demo.com</strong> and password <strong>demo</strong> to
-            continue.
-          </div>
-        </div>
-      )}
 
       {/* begin::Form group */}
       <div className='fv-row mb-8'>

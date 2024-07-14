@@ -11,7 +11,6 @@ const Header: FC = () => {
     updateDOM(config)
   }, [config])
 
-  const { pathname } = useLocation();
 
   return (
     <div

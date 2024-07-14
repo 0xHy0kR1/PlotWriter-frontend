@@ -35,6 +35,7 @@ const Navbar = () => {
   return (
     <div className="app-navbar flex-shrink-0">
       {/* create script button */}
+      { !isHomePage && (
       <div className={clsx('app-navbar-item ', itemClass)}>
         <button
           className='btn text-white rounded-pill d-flex justify-content-center align-items-center'
@@ -57,6 +58,7 @@ const Navbar = () => {
           </p>
         </button>
       </div>
+      )}
       <div className={clsx("app-navbar-item", itemClass)}>
         <ThemeModeSwitcher
           toggleBtnClass={clsx("btn-active-light-primary btn-custom")}

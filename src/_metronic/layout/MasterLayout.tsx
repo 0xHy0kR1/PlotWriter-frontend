@@ -17,8 +17,6 @@ const MasterLayout = () => {
     reInitMenu()
   }, [location.key])
 
-  // Determine whether to show the sidebar based on the current route(sidebar not render on homepage)
-  const showTopbar = location.pathname === '/';
 
   return (
     <PageDataProvider>
