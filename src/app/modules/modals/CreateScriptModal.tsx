@@ -10,7 +10,7 @@ import TextField from "@mui/material/TextField";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import Divider from "@mui/material/Divider";
-import CancelIcon from "@mui/icons-material/Cancel";
+import CloseIcon from '@mui/icons-material/Close';
 import IconButton from "@mui/material/IconButton";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import Stack from "@mui/material/Stack";
@@ -210,6 +210,8 @@ const isShortSubmitDisabled = !title || !socialMedia || !content;
     ...style,
     bgcolor: mode === "dark" || mode === "system" ? "#05090a" : "#fff",
     color: mode === "dark" || mode === "system" ? "#fff" : "#000",
+    borderRadius: "17px",
+    width: "40vw"
   };
 
   const labelColor = mode === "dark" || mode === "system" ? "#fff" : "#000";
@@ -249,7 +251,7 @@ const isShortSubmitDisabled = !title || !socialMedia || !content;
             Create a new script
           </Typography>
           <IconButton onClick={onRequestClose}>
-            <CancelIcon sx={radioIconStyle} />
+            <CloseIcon sx={radioIconStyle} />
           </IconButton>
         </Stack>
         <Divider sx={{ my: 2 }} orientation="horizontal" />
@@ -260,7 +262,6 @@ const isShortSubmitDisabled = !title || !socialMedia || !content;
               sx={{
                 fontSize: "1.2rem",
                 fontWeight: "light",
-                textAlign: "center",
                 color: labelColor,
               }}
             >
@@ -364,7 +365,13 @@ const isShortSubmitDisabled = !title || !socialMedia || !content;
           </Box>
         )}
         {step === 2 && format === "feature" && (
-          <Box>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 2
+            }}
+          >
             <Typography variant="h6">Feature Film Details</Typography>
             <TextField
               required
@@ -374,6 +381,7 @@ const isShortSubmitDisabled = !title || !socialMedia || !content;
               onChange={(e) => setTitle(e.target.value)}
               sx={{
                 ...getBottomBorderStyle(),
+                width: "100%",
                 "& .MuiInputBase-input": {
                   color: labelColor,
                 },
@@ -506,7 +514,7 @@ const isShortSubmitDisabled = !title || !socialMedia || !content;
               <Button
                 variant="outlined"
                 onClick={handleSubmit}
-                disabled={isFeatureSubmitDisabled}
+                disabled={isFeatureSubmitDisabled || editLoading}
                 sx={{
                   ...buttonStyles,
                   alignSelf: "flex-end",
@@ -535,7 +543,13 @@ const isShortSubmitDisabled = !title || !socialMedia || !content;
           </Box>
         )}
         {step === 2 && format === "short" && (
-          <Box>
+          <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 2
+          }}
+          >
             <TextField
               label="Title"
               value={title}

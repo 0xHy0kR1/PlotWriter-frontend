@@ -196,3 +196,53 @@ export const getScriptSampleById = async (scriptId: string) => {
     }
   }
 }
+
+// Function to generate character description
+export const generateCharacterDescription = async (individuality: string) => {
+  try{
+    const response = await axios.post(`${BASE_URL}/generate-desc`, { individuality }, {
+      headers: {
+        'Authorization': `Bearer ${authToken}`,
+      },
+    });
+    if(response.status === 200) {
+      return { success: true, data: response.data };
+    } else{
+      return { success: false, message: 'Failed to generate character description' };
+    }
+  } catch (error){
+    if (isError(error)) {
+      return { success: false, message: 'Failed to generate character description', error: error.message };
+    } else {
+      return { success: false, message: 'Failed to generate character description', error: 'Unknown error occurred' };
+    }
+  }
+}
+
+// Function to update character details
+export const updateCharacterDetails = async (scriptId: string, oldCharacterName: string, newCharacterName: string, characterDescriptions: string) => {
+  try{
+
+    const response = await axios.put(`${BASE_URL}/update-char-details/${scriptId}`, {
+      oldCharacterName,
+      newCharacterName,
+      characterDescriptions,
+    },{
+      headers: {
+        'Authorization': `Bearer ${authToken}`,
+      },
+    });
+
+    if(response.status === 200) {
+      return { success: true, message: 'Character details updated successfully', data: response.data };
+    } else{
+      return { success: false, message: 'Failed to update character details' };
+    }
+  } catch (error){
+    if(isError(error)){
+      return { success: false, message: 'Failed to update character details', error: error.message};
+    } else{
+      return { success: false, message: 'Failed to update character details', error: 'Unknown error occurred' };
+    }
+  }
+}

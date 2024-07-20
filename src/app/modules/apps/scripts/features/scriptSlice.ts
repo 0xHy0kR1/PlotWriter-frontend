@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { createScript, suggestTitles, getScripts, getEditorSampleContent, getScriptSampleById, updateScriptById  } from '../../../../services/scriptService';
+import { createScript, suggestTitles, getScripts, getEditorSampleContent, getScriptSampleById, updateScriptById, updateCharacterDetails, generateCharacterDescription  } from '../../../../services/scriptService';
 import { toast } from 'react-toastify';
 
 
@@ -44,6 +44,14 @@ interface ScriptState {
   fetchingEditorContent: boolean;
   error: string | null;
   editorContent: EditorContent | null;
+  characterDescription: string; 
+}
+
+interface updateCharacterData{
+  scriptId: string;
+  oldCharacterName: string;
+  newCharacterName: string;
+  characterDescription: string;
 }
 
 // Initialize the state
@@ -55,6 +63,7 @@ const initialState: ScriptState = {
   fetchingEditorContent: false,
   error: null,
   editorContent: null,
+  characterDescription: '',
 };
 
 // Async thunk for fetching sample script for editor by its ID
@@ -193,10 +202,9 @@ export const submitScript = createAsyncThunk<any, any, { rejectValue: string }>(
 
         // Now create the script with the fetched editor content
         const scriptResponse = await createScript({ ...scriptData, ...editorContent})
-        console.log("response from submitScript: ", scriptResponse)
 
         if(scriptResponse.success){
-          toast.success('Script created successfully!');
+          // toast.success('Script created successfully!');
           return scriptResponse.data;
         } else {
           throw new Error(scriptResponse.message);
@@ -208,6 +216,49 @@ export const submitScript = createAsyncThunk<any, any, { rejectValue: string }>(
     }
   }
 );
+
+// Async thunk for generating character description
+export const generateCharacterDesc = createAsyncThunk<
+  {description: string},
+  string,
+  {rejectValue: string}
+>(
+  'scripts/generateCharacterDesc',
+  async(briefDescription, {rejectWithValue }) => {
+    try{
+      const response = await generateCharacterDescription(briefDescription);
+      if(response.success){
+        return response.data;
+      } else{
+        throw new Error(response.message);
+      }
+    } catch(error: any){
+      return rejectWithValue(error.message);
+    }
+  }
+)
+
+// Async thunk for updating character details
+export const updateCharacter = createAsyncThunk<
+  any,
+  updateCharacterData,
+  {rejectValue: string}
+>(
+  'scripts/updateCharacter',
+  async (CharacterData: updateCharacterData, {rejectWithValue }) => {
+    try{
+      const { scriptId, oldCharacterName, newCharacterName, characterDescription } = CharacterData;
+      const response = await updateCharacterDetails(scriptId, oldCharacterName, newCharacterName, characterDescription)
+      if(response.success){
+        return response.data;
+      } else{
+        throw new Error(response.message);
+      } 
+    } catch (error: any){
+      return rejectWithValue(error);
+    }
+  }
+)
 
 // Create the script slice
 const scriptSlice = createSlice({
@@ -228,6 +279,7 @@ const scriptSlice = createSlice({
         state.editorContent.scriptSample = action.payload;
       }
     },
+    
   },
   extraReducers: (builder) => {
     builder
@@ -271,7 +323,7 @@ const scriptSlice = createSlice({
       })
       // Handle the pending state when submitting a script
       .addCase(submitScript.pending, (state) => {
-        toast.info('Submitting script...');
+        // toast.info('Submitting script...');
       })
       // Handle the fulfilled state when a script is submitted successfully
       .addCase(submitScript.fulfilled, (state, action) => {
@@ -332,7 +384,47 @@ const scriptSlice = createSlice({
       .addCase(updateScript.rejected, (state, action) => {
         state.error = action.payload as string;
         toast.error('Error updating script');
-      });
+      })
+
+      // Handle the pending state when updating a character
+      .addCase(updateCharacter.pending, (state) => {
+        toast.info('Updating character...');
+      })
+      // Handle the fulfilled state when a character is updated successfully
+      .addCase(updateCharacter.fulfilled, (state, action) => {
+        toast.success('Character updated successfully');
+        // Update the character in the state
+        const { scriptId, oldCharacterName, newCharacterName, characterDescription } = action.meta.arg;
+        const script = state.scripts.find(script => script._id === scriptId);
+        if(script && script.characters){
+          const characterIndex = script.characters.indexOf(oldCharacterName);
+          if(characterIndex > -1){
+            script.characters[characterIndex] = newCharacterName;
+          }
+        }
+      })
+      // Handle the rejected state when updating a character fails 
+      .addCase(updateCharacter.rejected, (state, action) => {
+        state.error = action.payload as string;
+        toast.error('Error updating character');
+      })
+
+      //Handle the pending state when generating a character description
+      .addCase(generateCharacterDesc.pending, (state) => {
+        toast.info('Generating character description...');
+      })
+
+      // Handle the fulfilled state when a character description is generated
+      .addCase(generateCharacterDesc.fulfilled, (state, action) => {
+        state.characterDescription = action.payload.description;
+        toast.success('Character description generated successfully!');
+      })
+
+      // Handle the rejected state when generating a character description fails
+      .addCase(generateCharacterDesc.rejected, (state, action) => {
+        state.error = action.payload as string;
+        toast.error('Error generating character description');
+      })
   },
 });
 

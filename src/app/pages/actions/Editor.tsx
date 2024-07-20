@@ -1,18 +1,35 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Box, Button, IconButton, Typography, Divider, Drawer, List, ListItem, ListItemText } from '@mui/material';
-import { useParams } from 'react-router-dom';
-import UndoIcon from '@mui/icons-material/Undo';
-import RedoIcon from '@mui/icons-material/Redo';
-import SaveIcon from '@mui/icons-material/Save';
-import FileDownloadIcon from '@mui/icons-material/FileDownload';
-import HistoryIcon from '@mui/icons-material/History';
-import FormatPaintIcon from '@mui/icons-material/FormatPaint';
-import CommentIcon from '@mui/icons-material/Comment';
-import LightbulbIcon from '@mui/icons-material/Lightbulb';
-import CharacterModal from './../../modules/modals/CharacterModal';
-import { useSelector, useDispatch } from 'react-redux';
-import { RootState, AppDispatch } from './../../../app/modules/apps/scripts/store';
-import { updateEditorContent, fetchSampleScriptById, updateScript } from './../../../app/modules/apps/scripts/features/scriptSlice';
+import React, { useState, useRef, useEffect, useCallback } from "react";
+import {
+  Box,
+  Button,
+  IconButton,
+  Typography,
+  Divider,
+  Drawer,
+  List,
+  ListItem,
+  ListItemText,
+} from "@mui/material";
+import { useParams } from "react-router-dom";
+import UndoIcon from "@mui/icons-material/Undo";
+import RedoIcon from "@mui/icons-material/Redo";
+import SaveIcon from "@mui/icons-material/Save";
+import FileDownloadIcon from "@mui/icons-material/FileDownload";
+import HistoryIcon from "@mui/icons-material/History";
+import FormatPaintIcon from "@mui/icons-material/FormatPaint";
+import CommentIcon from "@mui/icons-material/Comment";
+import LightbulbIcon from "@mui/icons-material/Lightbulb";
+import CharacterModal from "./../../modules/modals/CharacterModal";
+import { useSelector, useDispatch } from "react-redux";
+import {
+  RootState,
+  AppDispatch,
+} from "./../../../app/modules/apps/scripts/store";
+import {
+  updateEditorContent,
+  fetchSampleScriptById,
+  updateScript,
+} from "./../../../app/modules/apps/scripts/features/scriptSlice";
 import "./Editor.css";
 
 const MyEditor: React.FC = () => {
@@ -24,78 +41,99 @@ const MyEditor: React.FC = () => {
   const handleToggleCopilot = () => setCopilot(!copilot);
   const dispatch = useDispatch<AppDispatch>();
   const { editorContent } = useSelector((state: RootState) => state.scripts);
-  const { scriptId } = useParams<{ scriptId: string}>(); // Extracting scriptId from url
+  const { scriptId } = useParams<{ scriptId: string }>(); // Extracting scriptId from url
   const [script, setScript] = useState<any>(null);
-  
-  
+  const [selectedCharacter, setSelectedCharacter] = useState<string | null>(null);
+
+  if (!scriptId) {
+    // Handle the case when scriptId is undefined
+    return <div>Error: No scriptId provided</div>;
+  }
+
   const parseContent = (content: string) => {
     let sceneIndex = 0;
     let formattedContent = content
-      .replace(/^## (.*?)$/gm, '<h1 style="color: black; font-size: 2rem">$1</h1>') // Title
-      .replace(/^\*\*(Logline:.*?)\*\*$/gm, '<p><strong>$1</strong></p><br><br>') // Logline
+      .replace(
+        /^## (.*?)$/gm,
+        '<h1 style="color: black; font-size: 2rem">$1</h1>'
+      ) // Title
+      .replace(
+        /^\*\*(Logline:.*?)\*\*$/gm,
+        "<p><strong>$1</strong></p><br><br>"
+      ) // Logline
       .replace(/^\*\*(Characters:)\*\*$/gm, '<h3 style="color: black;">$1</h3>') // Characters heading
-      .replace(/^\*\s\*\*(.*?):\*\*(.*?)$/gm, '<p><strong>$1:</strong> $2</p>') // Character names
-      .replace(/^\*\*(Scene \d+:.*?)\*\*$/gm, '<br><br><h4 style="color: black; text-align: center;"><strong>$1</strong></h4>')
-      .replace(/^\*\*(INT\.|EXT\.)[^\*]*\*\*/gm, (match) => `<p id="scene-${sceneIndex++}" style="text-align: center;"><strong>${match}</strong></p><br>`)
-      .replace(/^(\*\*[A-Za-z\s\.]+:\*\*\s*)([\s\S]*?)(?=\n\n|\n*$)/gm, '<p><strong>$1</strong>$2</p>') // Character dialogues
-      .replace(/\*(.*?)\*/g, '<em>$1</em>') // Italic text
-      .replace(/^Visual:\s*$/gm, '<strong>Visual:</strong>') // Visual heading
-      .replace(/^Audio:\s*$/gm, '<strong>Audio:</strong>'); // Audio heading
-  
+      .replace(/^\*\s\*\*(.*?):\*\*(.*?)$/gm, "<p><strong>$1:</strong> $2</p>") // Character names
+      .replace(
+        /^\*\*(Scene \d+:.*?)\*\*$/gm,
+        '<br><br><h4 style="color: black; text-align: center;"><strong>$1</strong></h4>'
+      )
+      .replace(
+        /^\*\*(INT\.|EXT\.)[^\*]*\*\*/gm,
+        (match) =>
+          `<p id="scene-${sceneIndex++}" style="text-align: center;"><strong>${match}</strong></p><br>`
+      )
+      .replace(
+        /^(\*\*[A-Za-z\s\.]+:\*\*\s*)([\s\S]*?)(?=\n\n|\n*$)/gm,
+        "<p><strong>$1</strong>$2</p>"
+      ) // Character dialogues
+      .replace(/\*(.*?)\*/g, "<em>$1</em>") // Italic text
+      .replace(/^Visual:\s*$/gm, "<strong>Visual:</strong>") // Visual heading
+      .replace(/^Audio:\s*$/gm, "<strong>Audio:</strong>"); // Audio heading
+
     return formattedContent;
   };
 
   // Code for repositioning cursor position after content modification
   const getCaretPosition = (el: HTMLElement) => {
     let caretOffset = 0;
-  
+
     // Get the document and window objects from the element
     const doc = el.ownerDocument;
     const win = doc.defaultView;
-  
+
     // Get the current selection in the window
     const sel = win?.getSelection();
-  
+
     // If there is a selection and it has at least one range
     if (sel && sel.rangeCount > 0) {
       // Get the first range in the selection
       const range = sel.getRangeAt(0);
-  
+
       // Create a clone of the range to calculate the caret position
       const preCaretRange = range.cloneRange();
-  
+
       // Set the start of the range to the start of the element
       preCaretRange.selectNodeContents(el);
-  
+
       // Set the end of the range to the end of the current selection
       preCaretRange.setEnd(range.endContainer, range.endOffset);
-  
+
       // The length of the range text is the caret position
       caretOffset = preCaretRange.toString().length;
     }
-  
+
     return caretOffset;
   };
-  
+
   const setCaretPosition = (el: HTMLElement, offset: number) => {
     // Create a new range and get the current selection in the window
     const range = document.createRange();
     const sel = window.getSelection();
     if (!sel) return;
-  
+
     let charIndex = 0;
     // Initialize the stack with the given element
     const nodeStack: (Node | null)[] = [el];
     let node: Node | null = null;
     let foundStart = false;
     let stop = false;
-  
+
     // Process the stack until it's empty or we find the position
     while (!stop && (node = nodeStack.pop() ?? null)) {
       // If the node is a text node
       if (node.nodeType === 3) {
         const nextCharIndex = charIndex + (node.textContent?.length || 0);
-  
+
         // Check if the offset is within this text node
         if (!foundStart && offset >= charIndex && offset <= nextCharIndex) {
           // Set the start of the range
@@ -117,18 +155,29 @@ const MyEditor: React.FC = () => {
         }
       }
     }
-  
+
     // Clear any existing ranges and set the new range
     sel.removeAllRanges();
     sel.addRange(range);
   };
 
-    // Type guard to check if editorContent is not null
-    function isEditorContent(content: any): content is { scriptSample: string; characters: string[]; scenes: string[] } {
-      return content !== null && typeof content === 'object' && 'scriptSample' in content && 'characters' in content && 'scenes' in content;
-    }
+  // Type guard to check if editorContent is not null
+  function isEditorContent(
+    content: any
+  ): content is {
+    scriptSample: string;
+    characters: string[];
+    scenes: string[];
+  } {
+    return (
+      content !== null &&
+      typeof content === "object" &&
+      "scriptSample" in content &&
+      "characters" in content &&
+      "scenes" in content
+    );
+  }
 
-  
   useEffect(() => {
     console.log("scriptId", scriptId);
     if (scriptId) {
@@ -146,15 +195,16 @@ const MyEditor: React.FC = () => {
 
   useEffect(() => {
     console.log("editorContent: ", editorContent);
-    if(editorRef.current && editorContent){
-      const formattedContent = parseContent(editorContent.scriptSample)
+    if (editorRef.current && editorContent) {
+      const formattedContent = parseContent(editorContent.scriptSample);
       console.log("formattedContent: ", formattedContent);
       editorRef.current.innerHTML = formattedContent;
     }
     console.log("editorContent: " + JSON.stringify(editorContent));
-  }, [editorContent])
+  }, [editorContent]);
 
-  const handleCharacterClick = () => {
+  const handleCharacterClick = (character: string) => {
+    setSelectedCharacter(character);
     setCharacterModalOpen(true);
   };
 
@@ -170,7 +220,6 @@ const MyEditor: React.FC = () => {
     setCaretPosition(editorRef.current, caretPos);
   }, [handleEditorChange]);
 
-
   const toggleScenes = () => {
     setShowScenes(!showScenes);
     setShowCharacters(false);
@@ -182,47 +231,47 @@ const MyEditor: React.FC = () => {
   };
 
   const handleUndo = () => {
-    document.execCommand('undo');
+    document.execCommand("undo");
   };
 
   const handleRedo = () => {
-    document.execCommand('redo');
+    document.execCommand("redo");
   };
 
   const handleSave = () => {
-    if(!editorRef.current || !scriptId) return;
+    if (!editorRef.current || !scriptId) return;
 
     const content = editorRef.current?.innerHTML;
-    console.log('Saved content:', content);
+    console.log("Saved content:", content);
 
     const updatedScript = {
       id: scriptId,
-      title: script.title || "Default Title", // Replace with actual title if available
-      genre: script.genre || "Default Genre", // Replace with actual genre if available
-      synopsis: script.synopsis || "Default Synopsis", // Replace with actual synopsis if available
-      content: script.content || "Default Content", // Replace with actual content if available
-      socialMedia: script.socialMedia || "Default SocialMedia", // Replace with actual socialMedia if available
-      scriptSample: content || "Default scriptSample", 
+      title: script.title, // Replace with actual title if available
+      genre: script.genre, // Replace with actual genre if available
+      synopsis: script.synopsis, // Replace with actual synopsis if available
+      content: script.content, // Replace with actual content if available
+      socialMedia: script.socialMedia, // Replace with actual socialMedia if available
+      scriptSample: content,
       characters: editorContent?.characters,
       scenes: editorContent?.scenes,
-    }
+    };
 
     dispatch(updateScript(updatedScript))
-    .unwrap()
-    .then((result) => {
-      console.log('Update script success:', result);
-    })
-    .catch((error) => {
-      console.error('Update script error:', error);
-    });
+      .unwrap()
+      .then((result) => {
+        console.log("Update script success:", result);
+      })
+      .catch((error) => {
+        console.error("Update script error:", error);
+      });
   };
 
   const handleDownload = () => {
     const content = editorRef.current?.innerHTML;
-    const blob = new Blob([content || ''], { type: 'text/html' });
-    const link = document.createElement('a');
+    const blob = new Blob([content || ""], { type: "text/html" });
+    const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
-    link.download = 'content.html';
+    link.download = "content.html";
     link.click();
   };
 
@@ -230,10 +279,10 @@ const MyEditor: React.FC = () => {
     const sceneElements = document.querySelectorAll(`[id^="scene-"]`);
     sceneElements.forEach((el) => {
       if (el.innerHTML.includes(scene)) {
-        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        el.classList.add('highlight');
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+        el.classList.add("highlight");
         setTimeout(() => {
-          el.classList.remove('highlight');
+          el.classList.remove("highlight");
         }, 2000);
       }
     });
@@ -244,7 +293,7 @@ const MyEditor: React.FC = () => {
   }
 
   return (
-    <Box display="flex" height="100vh" sx={{ backgroundColor: '#d1d6e5' }}>
+    <Box display="flex" height="100vh" sx={{ backgroundColor: "#d1d6e5" }}>
       {/* Sidebar */}
       <Drawer variant="permanent" anchor="left">
         <Box width={250} display="flex" flexDirection="column" height="100vh">
@@ -253,17 +302,21 @@ const MyEditor: React.FC = () => {
               variant="h6"
               sx={{
                 p: 2,
-                cursor: 'pointer',
-                color: showScenes ? 'blue' : 'inherit',
+                cursor: "pointer",
+                color: showScenes ? "blue" : "inherit",
               }}
               onClick={toggleScenes}
             >
               Scenes
             </Typography>
             {showScenes && (
-              <List sx={{overflowY: 'auto', flexGrow: 1 }}>
+              <List sx={{ overflowY: "auto", flexGrow: 1 }}>
                 {editorContent.scenes.map((scene: string, index: number) => (
-                  <ListItem button key={index} onClick={() => handleSceneClick(scene)}>
+                  <ListItem
+                    button
+                    key={index}
+                    onClick={() => handleSceneClick(scene)}
+                  >
                     <ListItemText primary={scene} />
                   </ListItem>
                 ))}
@@ -276,20 +329,26 @@ const MyEditor: React.FC = () => {
               variant="h6"
               sx={{
                 p: 2,
-                cursor: 'pointer',
-                color: showCharacters ? 'blue' : 'inherit',
+                cursor: "pointer",
+                color: showCharacters ? "blue" : "inherit",
               }}
               onClick={toggleCharacters}
             >
               Characters
             </Typography>
             {showCharacters && (
-              <List sx={{ overflowY: 'auto', flexGrow: 1 }}>
-                {editorContent.characters.map((character: string, index: number) => (
-                  <ListItem button key={index} onClick={handleCharacterClick}>
-                    <ListItemText primary={character} />
-                  </ListItem>
-                ))}
+              <List sx={{ overflowY: "auto", flexGrow: 1 }}>
+                {editorContent.characters.map(
+                  (character: string, index: number) => (
+                    <ListItem
+                      button
+                      key={index}
+                      onClick={() => handleCharacterClick(character)}
+                    >
+                      <ListItemText primary={character} />
+                    </ListItem>
+                  )
+                )}
               </List>
             )}
           </Box>
@@ -297,7 +356,13 @@ const MyEditor: React.FC = () => {
       </Drawer>
 
       {/* Main Editor */}
-      <Box flex={1} display="flex" flexDirection="column" alignItems="center" justifyContent="center">
+      <Box
+        flex={1}
+        display="flex"
+        flexDirection="column"
+        alignItems="center"
+        justifyContent="center"
+      >
         {/* Top Toolbar */}
         <Box
           display="flex"
@@ -305,27 +370,43 @@ const MyEditor: React.FC = () => {
           alignItems="center"
           p={2}
           sx={{
-            position: 'relative',
+            position: "relative",
             top: 35,
             left: 0,
             right: 0,
-            backgroundColor: 'white',
-            height: '7%',
-            borderRadius: '3px'
+            backgroundColor: "white",
+            height: "7%",
+            borderRadius: "3px",
           }}
         >
           <Button variant="contained" onClick={handleToggleCopilot}>
             {copilot ? "Copilot is ON" : "Copilot is OFF"}
           </Button>
           <Box>
-            <IconButton onClick={handleUndo}><UndoIcon /></IconButton>
-            <IconButton onClick={handleRedo}><RedoIcon /></IconButton>
-            <IconButton onClick={handleSave}><SaveIcon /></IconButton>
-            <IconButton onClick={handleDownload}><FileDownloadIcon /></IconButton>
-            <IconButton><HistoryIcon /></IconButton>
-            <IconButton><FormatPaintIcon /></IconButton>
-            <IconButton><CommentIcon /></IconButton>
-            <IconButton><LightbulbIcon /></IconButton>
+            <IconButton onClick={handleUndo}>
+              <UndoIcon />
+            </IconButton>
+            <IconButton onClick={handleRedo}>
+              <RedoIcon />
+            </IconButton>
+            <IconButton onClick={handleSave}>
+              <SaveIcon />
+            </IconButton>
+            <IconButton onClick={handleDownload}>
+              <FileDownloadIcon />
+            </IconButton>
+            <IconButton>
+              <HistoryIcon />
+            </IconButton>
+            <IconButton>
+              <FormatPaintIcon />
+            </IconButton>
+            <IconButton>
+              <CommentIcon />
+            </IconButton>
+            <IconButton>
+              <LightbulbIcon />
+            </IconButton>
           </Box>
         </Box>
 
@@ -335,28 +416,37 @@ const MyEditor: React.FC = () => {
           contentEditable
           onInput={handleInput}
           sx={{
-            color: 'black',
-            height: 'calc(100vh - 120px)',
-            width: '80%',
-            maxWidth: '800px',
-            marginTop: '80px',
-            border: '1px solid #ccc',
-            padding: '16px',
-            overflow: 'auto',
-            backgroundColor: 'white',
-            outline: 'none',
-            '& h2': { fontSize: '1.5em', margin: '0.5em 0' },
-            '& h3': { fontSize: '1.2em', margin: '0.5em 0' },
-            '& p': { margin: '0.5em 0' },
-            '& strong': { fontWeight: 'bold' },
-            '& li': { margin: '0.5em 0', listStyleType: 'disc', marginLeft: '20px' },
-            '& br': { display: 'block', margin: '0.5em 0' },
+            color: "black",
+            height: "calc(100vh - 120px)",
+            width: "80%",
+            maxWidth: "800px",
+            marginTop: "80px",
+            border: "1px solid #ccc",
+            padding: "16px",
+            overflow: "auto",
+            backgroundColor: "white",
+            outline: "none",
+            "& h2": { fontSize: "1.5em", margin: "0.5em 0" },
+            "& h3": { fontSize: "1.2em", margin: "0.5em 0" },
+            "& p": { margin: "0.5em 0" },
+            "& strong": { fontWeight: "bold" },
+            "& li": {
+              margin: "0.5em 0",
+              listStyleType: "disc",
+              marginLeft: "20px",
+            },
+            "& br": { display: "block", margin: "0.5em 0" },
           }}
         ></Box>
       </Box>
 
       {/* Character Modal */}
-      <CharacterModal isOpen={isCharacterModalOpen} onClose={() => setCharacterModalOpen(false)} />
+      <CharacterModal
+        isOpen={isCharacterModalOpen}
+        onClose={() => setCharacterModalOpen(false)}
+        scriptId={scriptId}
+        oldCharacterName={selectedCharacter || ''}
+      />
     </Box>
   );
 };
